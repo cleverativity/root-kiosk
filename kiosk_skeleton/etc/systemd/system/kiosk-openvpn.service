@@ -1,0 +1,15 @@
+[Unit]
+Description=OpenVPN client (Cleverativity kiosk)
+After=network-online.target kiosk-wifi.service ntpdate.service
+Wants=network-online.target ntpdate.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/kiosk-openvpn
+Restart=always
+RestartSec=10
+WorkingDirectory=/tmp
+
+[Install]
+WantedBy=multi-user.target

@@ -1,5 +1,5 @@
 [Unit]
-Description=Generate wpa_supplicant.conf from kioskbrowser.ini
+Description=Generate wpa_supplicant.conf from kioskbrowser.ini (supports ssid2+)
 Before=wpa_supplicant.service ifup@wlan0.service
 
 [Service]

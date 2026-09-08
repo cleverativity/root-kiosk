@@ -1,3 +1,28 @@
+AnotterKiosk (Cleverativity image)
+=============================
+
+This repository builds a **Cleverativity kiosk image** on top of AnotterKiosk.
+
+Defaults baked into `/boot/firmware`:
+
+- Homepage: `https://a26-tbw-root-app-main.srvnve01.cleverativity.com/`
+- Splash screen: Cleverativity logo (`splash.png`)
+- Keyboard layout: Italian (`it`) plus an on-screen keyboard (onboard)
+- Screen never blanks
+- WiFi: `CleverWiFi` and `CleverWiFiX`
+- OpenVPN client (`openvpn.ovpn`); SSH (22) and VNC (5900) are firewalled so they are **only reachable from the VPN**
+- SSH admin key on the FAT32 partition: `kiosk_admin` (see `authorized_keys`)
+
+Flash the image, then optionally edit `kioskbrowser.ini` on the boot partition. After the VPN comes up:
+
+```
+ssh -i kiosk_admin pi@<kiosk-vpn-ip>
+```
+
+VNC: connect to `<kiosk-vpn-ip>:5900` (no password; access is limited to the tunnel).
+
+---
+
 AnotterKiosk
 =============================
 
