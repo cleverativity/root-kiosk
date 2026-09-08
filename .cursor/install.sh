@@ -27,7 +27,7 @@ APT_OPTS=(-y --no-install-recommends \
 sudo apt-get update -qq
 
 # Image-build toolchain (mirrors the "Install dependencies" step in CI) plus
-# shellcheck for linting and nginx/php for exercising the local webserver.
+# the linter (ShellCheck) and nginx/php for exercising the local webserver.
 sudo apt-get install "${APT_OPTS[@]}" \
   libguestfs-tools \
   qemu-utils \
