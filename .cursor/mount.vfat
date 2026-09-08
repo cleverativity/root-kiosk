@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# mount.vfat helper for AnotterKiosk image builds inside a Cloud Agent VM.
+#
+# Why this exists:
+#   This VM's shared host kernel has no in-kernel FAT/vfat support and no
+#   loadable kernel modules (/lib/modules is absent, /proc/filesystems has no
+#   vfat), so `mount -t vfat ...` fails with "unknown filesystem type 'vfat'".
+#   On GitHub Actions runners the kernel provides vfat, so the build scripts
+#   (build_x86.sh / build_raspberry_pi.sh) mount the FAT boot partition
+#   directly and work unchanged.
+#
+# What this does:
+#   util-linux mount(8) execs /sbin/mount.<type> when it exists, so installing
+#   this file as /sbin/mount.vfat makes `mount <dev> <dir>` (auto-detected as
+#   vfat) transparently use the userspace FUSE FAT driver (fusefat) instead of
+#   the missing kernel driver. fusefat requires the explicit "rw+" option to
+#   allow writes, which grub-install and the skeleton copy need. This keeps the
+#   repository's build scripts completely unmodified.
+#
+# Invocation convention (from mount(8)): mount.vfat SOURCE TARGET [-o opts] ...
+set -euo pipefail
+
+src="${1:-}"
+tgt="${2:-}"
+if [ -z "$src" ] || [ -z "$tgt" ]; then
+  echo "mount.vfat: usage: mount.vfat <source> <target> [-o options]" >&2
+  exit 1
+fi
+
+# fusefat daemonizes and returns once the mount is ready. "-o rw+" opts into
+# its experimental read-write mode; "-o nonempty" tolerates a pre-created
+# mountpoint directory. "-o fsname=<device>" makes /proc/mounts report the
+# backing block device (instead of the literal "fusefat"), which lets tools
+# such as grub-probe/grub-install canonicalize the device and read the FAT
+# filesystem straight from it.
+exec fusefat "$src" "$tgt" -o rw+ -o nonempty -o fsname="$src"
