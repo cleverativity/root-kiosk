@@ -1,0 +1,18 @@
+#!/bin/bash
+
+CONFIG="/boot/firmware/openvpn.ovpn"
+
+if [ ! -f "${CONFIG}" ]; then
+	echo "No OpenVPN profile found at ${CONFIG}; waiting."
+	exec sleep infinity
+fi
+
+# Copy off the FAT32 config partition so OpenVPN never writes there.
+cp "${CONFIG}" /tmp/openvpn.conf
+
+exec /usr/sbin/openvpn \
+	--config /tmp/openvpn.conf \
+	--writepid /run/openvpn-kiosk.pid \
+	--status /run/openvpn-kiosk.status 10 \
+	--suppress-timestamps \
+	--auth-nocache

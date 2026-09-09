@@ -8,8 +8,13 @@ fi
 VNC_ENABLED=$(get-ini /boot/firmware/kioskbrowser.ini vnc enabled)
 if [ "${VNC_ENABLED}" -eq 1 ]
 then
-	x11vnc -localhost &
+	# Bind on all interfaces; nftables only allows port 5900 from tun*.
+	x11vnc -forever -shared -repeat -rfbport 5900 -nopw -o /tmp/x11vnc.log &
 fi
+
+# apply the configured keyboard layout inside X11
+LAYOUT=$(get-ini /boot/firmware/kioskbrowser.ini general keyboard_layout us)
+setxkbmap "${LAYOUT}" || true
 
 # move the cursor out of the way
 xdotool mousemove 0 0
@@ -23,6 +28,7 @@ else
         xset s off # don't activate screensaver
         xset -dpms # disable DPMS (Energy Star) features.
         xset s noblank # don't blank the video device
+        xset s 0 0 || true
 fi
 
 # hide mouse cursor after 1 second
@@ -99,6 +105,17 @@ else
     CHROME_CACHE_FLAGS=""
 fi
 
+# The homepage and remote admin live on the VPN. Wait for tun0 so
+# Chromium does not load an error page before the tunnel is up.
+VPN_WAIT=0
+while [ "${VPN_WAIT}" -lt 120 ]; do
+	if ip -o link show tun0 >/dev/null 2>&1; then
+		break
+	fi
+	sleep 1
+	VPN_WAIT=$((VPN_WAIT + 1))
+done
+
 # start chromium
 URL=$(get-ini /boot/firmware/kioskbrowser.ini browser url)
 chromium --start-fullscreen \
@@ -125,6 +142,17 @@ chromium --start-fullscreen \
 		 ${CHROME_LOW_END_FLAGS} \
 		 ${CHROME_CACHE_FLAGS} \
 		 ${URL} &
+
+# On-screen keyboard (always-on-top overlay; Italian layout follows XKB)
+ONSCREEN=$(get-ini /boot/firmware/kioskbrowser.ini keyboard onscreen)
+if [ "${ONSCREEN}" = "1" ] && command -v onboard >/dev/null 2>&1
+then
+	gsettings set org.onboard.window disable-in-fullscreen false || true
+	gsettings set org.onboard.window force-to-top true || true
+	gsettings set org.onboard.window docking-enabled true || true
+	gsettings set org.onboard.window docking-edge bottom || true
+	onboard &
+fi
 
 # if a cache clearing interval is specified, launch the cache-clear-timer (while true, sleep, rm -rf)
 CACHE_CLEAR=$(get-ini /boot/firmware/kioskbrowser.ini browser cache_clear_interval)

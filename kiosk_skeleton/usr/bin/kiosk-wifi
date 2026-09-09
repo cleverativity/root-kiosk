@@ -7,29 +7,64 @@ echo "nameserver 8.8.4.4" >> /etc/resolv.conf
 echo "nameserver 2001:4860:4860::8844" >> /etc/resolv.conf
 
 if [ -f "/boot/firmware/wpa_supplicant.conf" ]; then
-	ln -s /boot/firmware/wpa_supplicant.conf /tmp/wpa_supplicant.conf
+	ln -sf /boot/firmware/wpa_supplicant.conf /tmp/wpa_supplicant.conf
+	rfkill unblock all || true
+	iw wlan0 set power_save off || true
 	exit
 fi
 
-WIFI_SSID=$(get-ini /boot/firmware/kioskbrowser.ini wifi ssid)
-WIFI_PSK=$(get-ini /boot/firmware/kioskbrowser.ini wifi psk)
 WIFI_COUNTRY=$(get-ini /boot/firmware/kioskbrowser.ini wifi country)
 
+append_network() {
+	local ssid="$1"
+	local psk="$2"
+	local priority="$3"
+	[ -z "${ssid}" ] && return 0
+	{
+		echo "network={"
+		echo "	ssid=\"${ssid}\""
+		if [ -n "${psk}" ]; then
+			echo "	psk=\"${psk}\""
+		else
+			echo "	key_mgmt=NONE"
+		fi
+		echo "	priority=${priority}"
+		echo "}"
+	} >> /tmp/wpa_supplicant.conf
+}
+
+WIFI_SSID=$(get-ini /boot/firmware/kioskbrowser.ini wifi ssid)
 if [ -n "${WIFI_SSID}" ]
 then
 	echo "country=${WIFI_COUNTRY}" > /tmp/wpa_supplicant.conf
 	echo "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev" >> /tmp/wpa_supplicant.conf
 	echo "update_config=1" >> /tmp/wpa_supplicant.conf
-	echo "network={" >> /tmp/wpa_supplicant.conf
-	echo "	ssid=\"${WIFI_SSID}\"" >> /tmp/wpa_supplicant.conf
-	if [ -n "${WIFI_PSK}" ]
-	then
-		echo "	psk=\"${WIFI_PSK}\"" >> /tmp/wpa_supplicant.conf
-	else
-		echo "	key_mgmt=NONE" >> /tmp/wpa_supplicant.conf
-	fi
-	echo "}" >> /tmp/wpa_supplicant.conf
+
+	WIFI_PSK=$(get-ini /boot/firmware/kioskbrowser.ini wifi psk)
+	append_network "${WIFI_SSID}" "${WIFI_PSK}" 10
+
+	# Optional extra profiles: ssid2/psk2, ssid3/psk3, ...
+	i=2
+	while [ "${i}" -le 8 ]; do
+		ssid_n=$(get-ini /boot/firmware/kioskbrowser.ini wifi "ssid${i}")
+		if [ -z "${ssid_n}" ]; then
+			break
+		fi
+		psk_n=$(get-ini /boot/firmware/kioskbrowser.ini wifi "psk${i}")
+		if [ -z "${psk_n}" ]; then
+			psk_n="${WIFI_PSK}"
+		fi
+		prio=$((11 - i))
+		if [ "${prio}" -lt 1 ]; then
+			prio=1
+		fi
+		append_network "${ssid_n}" "${psk_n}" "${prio}"
+		i=$((i + 1))
+	done
 fi
 
 rfkill unblock all || true
 iw wlan0 set power_save off || true
+if [ -n "${WIFI_COUNTRY}" ]; then
+	iw reg set "${WIFI_COUNTRY}" || true
+fi

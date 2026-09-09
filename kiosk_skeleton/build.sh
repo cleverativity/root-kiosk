@@ -5,7 +5,7 @@ set -x -e
 apt update
 
 APT_LISTCHANGES_FRONTEND=none DEBIAN_FRONTEND=noninteractive apt dist-upgrade -y --option=Dpkg::Options::=--force-confdef
-DEBIAN_FRONTEND=noninteractive apt install -y wget curl fonts-noto-color-emoji lightdm openbox nginx php-fpm php-cli chromium autossh unclutter x11-xserver-utils xdotool htop nano openssh-server rsync x11vnc lm-sensors ntpsec-ntpdate scrot wireless-regdb fontconfig console-data ifupdown iproute2 wpasupplicant iw wireless-tools haveged rfkill fbi feh
+DEBIAN_FRONTEND=noninteractive apt install -y wget curl fonts-noto-color-emoji lightdm openbox nginx php-fpm php-cli chromium autossh unclutter x11-xserver-utils x11-xkb-utils xdotool htop nano openssh-server rsync x11vnc lm-sensors ntpsec-ntpdate scrot wireless-regdb fontconfig console-data ifupdown iproute2 wpasupplicant iw wireless-tools haveged rfkill fbi feh openvpn nftables onboard at-spi2-core dbus-x11 dconf-cli dconf-gsettings-backend
 
 rsync -a --chown=root:root "/kiosk_skeleton/." "/"
 
@@ -32,6 +32,8 @@ chown -hR 0:0 /etc/sudoers.d/
 chown -hR www-data:www-data /var/www/html/
 
 mkdir -p /home/pi/.config/chromium/
+mkdir -p /home/pi/.config/onboard
+chown -hR 1000:1000 /home/pi
 chown -hR 1000:1000 /home/pi/.config/chromium/
 mkdir -p /home/pi/.cache
 chown -hR 1000:1000 /home/pi/.cache
@@ -112,6 +114,10 @@ systemctl enable kiosk-autossh
 systemctl enable kiosk-watchdog
 systemctl enable kiosk-set-hostname
 systemctl enable kiosk-locale
+systemctl enable kiosk-openvpn
+systemctl enable nftables
+systemctl disable openvpn.service || true
+systemctl disable openvpn-client@.service || true
 systemctl enable ntpdate
 systemctl enable lightdm
 systemctl enable nginx
