@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
-# Cloud Agent install script for AnotterKiosk.
+# Cloud Agent install script for root-kiosk.
 #
-# AnotterKiosk is a Debian-based kiosk OS image builder. The images are produced
+# root-kiosk is a Debian-based kiosk OS image builder. The images are produced
 # by ./build_raspberry_pi.sh, which downloads a Raspberry Pi OS image, expands it
 # on a loop device, chroots into the (arm64/armhf) root filesystem via
 # qemu-user-static binfmt emulation and installs the kiosk skeleton.
@@ -53,4 +53,4 @@ sudo apt-get install "${APT_OPTS[@]}" \
   php-fpm \
   php-cli
 
-echo "AnotterKiosk Cloud Agent environment ready."
+echo "root-kiosk Cloud Agent environment ready."

@@ -1,4 +1,6 @@
 raspikiosk.img
 raspios.img.xz
+root-kiosk-*.img
+root-kiosk-*.img.xz
 work/
 .DS_Store
