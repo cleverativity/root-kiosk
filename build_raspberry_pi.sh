@@ -71,7 +71,7 @@ sudo rm "${BUILD_DIR}/boot/firmware/config.txt"
 sudo mv "${BUILD_DIR}/boot/firmware/config-${IMAGE_SUFFIX}.txt" "${BUILD_DIR}/boot/firmware/config.txt"
 
 # Include git repo version info
-echo -n "AnotterKiosk Raspberry Pi version: " > "${BUILD_DIR}/version-info"
+echo -n "root-kiosk Raspberry Pi version: " > "${BUILD_DIR}/version-info"
 git describe --abbrev=4 --dirty --always --tags >> "${BUILD_DIR}/version-info"
 
 # Mount system partitions (from the build host)
@@ -110,6 +110,6 @@ sudo zerofree /dev/loop0p2
 
 sudo losetup -D /dev/loop0
 
-tag=$(git describe --abbrev=4 --dirty --always --tags)
-mv raspikiosk.img anotterkiosk-${tag}-${IMAGE_SUFFIX}.img
-xz -T0 anotterkiosk-${tag}-${IMAGE_SUFFIX}.img
+tag=$(git rev-parse --short=7 HEAD)
+mv raspikiosk.img "root-kiosk-${tag}-${IMAGE_SUFFIX}.img"
+xz -T0 "root-kiosk-${tag}-${IMAGE_SUFFIX}.img"

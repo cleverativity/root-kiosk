@@ -1,4 +1,4 @@
 {
-  "name": "AnotterKiosk",
+  "name": "root-kiosk",
   "install": "./.cursor/install.sh"
 }

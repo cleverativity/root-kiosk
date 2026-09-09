@@ -1,7 +1,7 @@
-AnotterKiosk (Cleverativity image)
+root-kiosk (Cleverativity image)
 =============================
 
-This repository builds a **Cleverativity kiosk image** on top of AnotterKiosk.
+This repository builds a **Cleverativity kiosk image** (root-kiosk).
 
 Defaults baked into `/boot/firmware`:
 
@@ -23,7 +23,7 @@ VNC: connect to `<kiosk-vpn-ip>:5900` (no password; access is limited to the tun
 
 ---
 
-AnotterKiosk
+root-kiosk
 =============================
 
 <img src="https://screenshot.tbspace.de/zachejgwlkq.jpg" width="45%"> <img src="https://screenshot.tbspace.de/kuhmlynagbw.jpg" width="45%">
@@ -47,7 +47,7 @@ Other similar projects:
 - are missing watchdog functionality (can hang on browser error pages forever)
 
 ## Key features
-- [Images built via CI](https://github.com/Manawyrm/AnotterKiosk/blob/main/.github/workflows/main.yml)
+- [Images built via CI](https://github.com/cleverativity/root-kiosk/blob/main/.github/workflows/main.yml) and published to [Releases](https://github.com/cleverativity/root-kiosk/releases) on every push to `main`
 - WiFi & Ethernet connection support
 - Raspberry Pi & PC (64-bit) compatibility
 - [USB flash drive, USB SSD, etc. compatible](#how-to--installation-guide)
@@ -69,11 +69,11 @@ Other similar projects:
 - [Local webserver with PHP support](#local-webserver) (can host simple HTML, landing pages, slideshows, iFrame mechanisms, etc.)
 
 ## Supported platforms
-- Raspberry Pi 3, 4, 5, Zero 2 (W): use `arm64-raspberrypi.img.xz`
+- Raspberry Pi 3, 4, 5, Zero 2 (W): use `root-kiosk-*-arm64-raspberrypi.img.xz`
 - PCs with UEFI (Intel, AMD or Nvidia GPUs): use `x86.img.xz`
 
 **not recommended, but working**
-- Raspberry Pi 1, 2, Zero (W) (very slow, 32bit only, try to avoid): use `armhf-raspberrypi.img.xz`
+- Raspberry Pi 1, 2, Zero (W) (very slow, 32bit only, try to avoid): use `root-kiosk-*-armhf-raspberrypi.img.xz`
 
 ## Application examples
 - Digital signage
@@ -87,7 +87,7 @@ Other similar projects:
 - Magic mirrors
 
 > [!TIP]
-> Combining AnotterKiosk with an existing web CMS (like Typo3) is an excellent way to build a very flexible digital signage solution:  
+> Combining root-kiosk with an existing web CMS (like Typo3) is an excellent way to build a very flexible digital signage solution:  
 > By configuring a hidden/special sub-page with a full-screen layout, employees can easily modify the digital signage solution themselves.
 > Often teams are already trained on the existing content management systems, reducing training times.  
 > It will also work without any monthly fees (unlike other hosted/SaaS/cloud-based digital signage solutions).
@@ -101,25 +101,25 @@ Other similar projects:
 - Autossh does not check SSH host keys. This is okay-ish as long as the target server only allows tunneling, nothing else.
 - nginx/PHP are allowed to use sudo/NOPASSWD (because it needs to query the VideoCore, manage service, etc.), more priviledge seperation would be nice
 - due to the skeleton mechanism, the system has some ... creative permissions. some cleanup required.
-- AnotterKiosk is not built in a reproducible/repeatible way. This is basically unfixable due to the nature of the build process.
+- root-kiosk is not built in a reproducible/repeatible way. This is basically unfixable due to the nature of the build process.
 
 ## How-To / Installation guide
 
 > [!IMPORTANT]  
-> AnotterKiosk does not have an installer for x86 PCs. On PCs, you'll need to write the image to the storage somehow.
+> root-kiosk does not have an installer for x86 PCs. On PCs, you'll need to write the image to the storage somehow.
 > Either write the storage media (like NVMe or SATA storage) externally using another PC or boot a Linux Live-ISO and use dd to flash the image.
 
 > [!WARNING]  
 > Don't use the `armhf` images on Raspberry Pi 3 or newer (or the Zero 2 (W)). It will work, but performance will be impacted severely.
 
 Just like any other Raspberry Pi image:   
-Download the current .img.xz file from the [Releases](https://github.com/Manawyrm/AnotterKiosk/releases) page and flash it to a storage device of your choice.  
+Download the current .img.xz file from the [Releases](https://github.com/cleverativity/root-kiosk/releases) page and flash it to a storage device of your choice.  
 SD cards, USB flash drives, USB SSDs, SATA SSDs, NVMe SSDs are all good options.  
 You can use a tool like the [Raspberry Pi Imager](https://www.raspberrypi.com/software/), [BalenaEtcher](https://etcher.balena.io/), [Win32DiskImager](https://sourceforge.net/projects/win32diskimager/) or plain "dd" on \*nix-like systems.   
 When using the latter two, make sure to extract the .gz compression first (using a tool like 7zip).  
 
 After flashing, re-plug the storage device and open the FAT32 partition.  
-Open the [`kioskbrowser.ini`](https://github.com/Manawyrm/AnotterKiosk/blob/main/kiosk_skeleton/boot/firmware/kioskbrowser.ini) file in a text editor and change everything to your needs.  
+Open the [`kioskbrowser.ini`](https://github.com/cleverativity/root-kiosk/blob/main/kiosk_skeleton/boot/firmware/kioskbrowser.ini) file in a text editor and change everything to your needs.  
 More complex WiFi setups (like WPA2-Enterprise) can be configured by creating a wpa_supplicant.conf.  
 Adding your own SSH keys can be done by creating a authorized_keys file.  
 If you want to use the autossh tunneling features, copy an SSH private key as either "id_rsa" or "id_ed25519".  
@@ -148,7 +148,7 @@ setInterval(function() {
 Whenever the heartbeat stops (for whatever reason), the device will first restart the X11 environment (browser, window manager, etc.) and later (if it hasn't recovered) the whole system by rebooting.
 
 ## Local webserver
-AnotterKiosk ships with an nginx webserver and a PHP runtime by default (which is used internally for the heartbeat mechanism).  
+root-kiosk ships with an nginx webserver and a PHP runtime by default (which is used internally for the heartbeat mechanism).  
 Users can create a folder called `www-public` on the FAT32 partition and put custom HTML or PHP scripts there.  
 Any files placed in the `/boot/firmware/www-public` folder will be available via `http://localhost/www-public/`.  
 Files called `index.php` will be served as the directory index.  
